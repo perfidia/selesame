@@ -33,7 +33,24 @@ def analyze(url = None, driver = None):
     # through parents until parent == html and then store concatenated path.
     #TODO: delete elements with href that don't exists > 1 time
 
-    print output
+    #code bellow shows unique set of 'href' links and number of instances
+    #links with are one the page only once aren ot displayed
+
+    database = set()
+    
+    for i in output:
+        
+        if i['href'] not in database:
+            counter = 1
+             
+            for j in output:
+                if i != j and i['href'] == j['href']:
+                    counter += 1
+             
+            if counter > 1 and i['href'] not in database:
+                print "Number of instances (%s): %d times" % (i['href'], counter)
+                database.add(i['href'])
+
 
 def get_same(url = None, driver = None, id = None, xpath = None):
     """
