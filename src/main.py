@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import selesame
-import selenium
+from selenium import webdriver
 
 if __name__ == '__main__':
-    selesame = selesame.analyze("http://www.fc.put.poznan.pl")
-    pass
+    driver = webdriver.Firefox()
+    r = selesame.analyze(url = "http://www.fc.put.poznan.pl", driver = driver)
+    print r
+    driver.close()
