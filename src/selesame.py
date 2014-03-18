@@ -3,6 +3,7 @@
 from selenium import webdriver
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import NoSuchElementException
+from collections import defaultdict
 
 
 
@@ -33,24 +34,19 @@ def analyze(url = None, driver = None):
     # through parents until parent == html and then store concatenated path.
     #TODO: delete elements with href that don't exists > 1 time
 
-    #code bellow shows unique set of 'href' links and number of instances
-    #links with are one the page only once aren ot displayed
+    #code bellow shows dictionary of 'href' links and number of instances
+    #DICTIONARY STRUCTURE { 'http://fc.put.poznan.pl/o-wydziale/dziekanat%2C45.html': 2 , ... }
 
-    database = set()
+    d = defaultdict(int)
     
-    for i in output:
+    for links in output:
+        d[links['href']] += 1
+   
+    #if you want to see the result, uncomment 2 lines bellow
+    #for key in d:
+    #    print key, " : ", d[key]
         
-        if i['href'] not in database:
-            counter = 1
-             
-            for j in output:
-                if i != j and i['href'] == j['href']:
-                    counter += 1
-             
-            if counter > 1 and i['href'] not in database:
-                print "Number of instances (%s): %d times" % (i['href'], counter)
-                database.add(i['href'])
-
+        
 
 def get_same(url = None, driver = None, id = None, xpath = None):
     """
