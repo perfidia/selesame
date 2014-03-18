@@ -41,9 +41,6 @@ def analyze(url = None, driver = None):
     links = defaultdict(deque)
     for node in nodes:
         links[node.get_attribute('href')].append(getXPathFromNode(node))
-    # you cannot extract xpath of already found element, so i've put object of WebElement inside dictionary (used
-    # dictionaries it to better present result) maybe to get path to that WebElement object we should try to iterate
-    # through parents until parent == html and then store concatenated path.
 
     return links
 
