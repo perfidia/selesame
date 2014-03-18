@@ -3,8 +3,21 @@
 from selenium import webdriver
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import NoSuchElementException
+from collections import defaultdict
+from collections import deque
 
+def getXPathFromNode(node):
+    """
 
+    :param node: WebElement took from selenium
+    :return: xpath of WebElement
+    """
+    #TODO: transform nodes into xpath (hint: reverse array and read http://www.w3schools.com/XPath/xpath_syntax.asp)
+    xnodes = [node.get_attribute("href"), node.tag_name]
+    while (node.tag_name != "html"):
+        node = node.parent()
+        xnodes.append(node.tag_name)
+    return node
 
 def analyze(url = None, driver = None):
     """
@@ -24,33 +37,15 @@ def analyze(url = None, driver = None):
         # no parameter provided, create the default driver
         driver = webdriver.Chrome()
     driver.get(url)
-    atags = driver.find_elements_by_tag_name('a')
-    output = list()
-    for a in atags:
-        output.append({'href' : a.get_attribute('href'), 'webelement' : a})
+    nodes = driver.find_elements_by_tag_name('a')
+    links = defaultdict(deque)
+    for node in nodes:
+        links[node.get_attribute('href')].append(getXPathFromNode(node))
     # you cannot extract xpath of already found element, so i've put object of WebElement inside dictionary (used
     # dictionaries it to better present result) maybe to get path to that WebElement object we should try to iterate
     # through parents until parent == html and then store concatenated path.
-    #TODO: delete elements with href that don't exists > 1 time
 
-    #code bellow shows unique set of 'href' links and number of instances
-    #links with are one the page only once aren ot displayed
-
-    database = set()
-    
-    for i in output:
-        
-        if i['href'] not in database:
-            counter = 1
-             
-            for j in output:
-                if i != j and i['href'] == j['href']:
-                    counter += 1
-             
-            if counter > 1 and i['href'] not in database:
-                print "Number of instances (%s): %d times" % (i['href'], counter)
-                database.add(i['href'])
-
+    return links
 
 def get_same(url = None, driver = None, id = None, xpath = None):
     """
