@@ -22,9 +22,11 @@ def getXPathFromNode(node):
     xpath = ""
     
     for i in reversed(xnodes):
-        xpath += "/%s" % i
+        if i < len(xnodes)-1:
+            xpath += "/%s" % i
+        else:
+             xpath += "/[href=%s]" % node.get_attribute
     
-    xpath += "[href=%s]" % node.get_attribute
     print xpath
     return xpath
 
@@ -55,12 +57,6 @@ def analyze(url = None, driver = None):
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
     nodes = driver.find_elements_by_tag_name('a')
-    #
-    print "---"
-    dir(nodes)
-    print "---"
-    type(nodes)
-    print "---"
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
     for node in nodes:
