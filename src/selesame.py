@@ -20,6 +20,12 @@ def getXPathFromNode(node):
     #     xnodes.append(node.tag_name)
     return node
 
+def decorateLinkUrl(url, link):
+    if 'http://' not in link:
+        link = url + '/' + link
+    return link
+
+
 def analyze(url = None, driver = None):
     """
 	Analyze a given webpage and return list of elements with the same actions.
@@ -38,6 +44,8 @@ def analyze(url = None, driver = None):
         # no parameter provided, create the default driver
         driver = webdriver.Chrome()
     driver.get(url)
+    # when server does a redirect the url is mismatched with actual site
+    url = driver.current_url
     nodes = driver.find_elements_by_tag_name('a')
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
@@ -47,15 +55,13 @@ def analyze(url = None, driver = None):
         found = re.findall("location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
         for loc in found:
             href = loc.split("'")
-            if 'http://' not in href[1]:
-                href[1] = url + '/' + href[1]
-            links[href[1]].append(getXPathFromNode(script))
+            links[decorateLinkUrl(url, href[1])].append(getXPathFromNode(script))
         found = re.findall('location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
         for loc in found:
             href = loc.split('"')
             if 'http://' not in href[1]:
                 href[1] = url + '/' + href[1]
-            links[href[1]].append(getXPathFromNode(script))
+            links[decorateLinkUrl(url, href[1])].append(getXPathFromNode(script))
     return links
 
 def get_same(url = None, driver = None, id = None, xpath = None):
