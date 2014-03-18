@@ -13,12 +13,20 @@ def getXPathFromNode(node):
     :param node: WebElement took from selenium
     :return: xpath of WebElement
     """
-    #TODO: transform nodes into xpath (hint: reverse array and read http://www.w3schools.com/XPath/xpath_syntax.asp)
-    # xnodes = [node.get_attribute("href"), node.tag_name]
-    # while (node.tag_name != "html"):
-    #     node = node.parent()
-    #     xnodes.append(node.tag_name)
-    return node
+    
+    xnodes = [node.get_attribute("href"), node.tag_name]
+    while (node.tag_name != "html"):
+        node = node.parent()
+        xnodes.append(node.tag_name)
+    
+    xpath = ""
+    
+    for i in reversed(xnodes):
+        xpath += "/%s" % i
+    
+    xpath += "[href=%s]" % node.get_attribute
+    print xpath
+    return xpath
 
 def decorateLinkUrl(url, link):
     if 'http://' not in link:
@@ -47,6 +55,12 @@ def analyze(url = None, driver = None):
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
     nodes = driver.find_elements_by_tag_name('a')
+    #
+    print "---"
+    dir(nodes)
+    print "---"
+    type(nodes)
+    print "---"
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
     for node in nodes:
