@@ -5,6 +5,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import NoSuchElementException
 from collections import defaultdict
 from collections import deque
+import re
 
 def getXPathFromNode(node):
     """
@@ -13,10 +14,10 @@ def getXPathFromNode(node):
     :return: xpath of WebElement
     """
     #TODO: transform nodes into xpath (hint: reverse array and read http://www.w3schools.com/XPath/xpath_syntax.asp)
-    xnodes = [node.get_attribute("href"), node.tag_name]
-    while (node.tag_name != "html"):
-        node = node.parent()
-        xnodes.append(node.tag_name)
+    # xnodes = [node.get_attribute("href"), node.tag_name]
+    # while (node.tag_name != "html"):
+    #     node = node.parent()
+    #     xnodes.append(node.tag_name)
     return node
 
 def analyze(url = None, driver = None):
@@ -38,10 +39,23 @@ def analyze(url = None, driver = None):
         driver = webdriver.Chrome()
     driver.get(url)
     nodes = driver.find_elements_by_tag_name('a')
+    onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
     for node in nodes:
         links[node.get_attribute('href')].append(getXPathFromNode(node))
-
+    for script in onclicks:
+        found = re.findall("location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
+        for loc in found:
+            href = loc.split("'")
+            if 'http://' not in href[1]:
+                href[1] = url + '/' + href[1]
+            links[href[1]].append(getXPathFromNode(script))
+        found = re.findall('location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
+        for loc in found:
+            href = loc.split('"')
+            if 'http://' not in href[1]:
+                href[1] = url + '/' + href[1]
+            links[href[1]].append(getXPathFromNode(script))
     return links
 
 def get_same(url = None, driver = None, id = None, xpath = None):

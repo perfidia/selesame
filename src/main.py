@@ -6,6 +6,6 @@ from selenium import webdriver
 
 if __name__ == '__main__':
     driver = webdriver.Firefox()
-    r = selesame.analyze(url = "http://www.xitro.eu", driver = driver)
+    r = selesame.analyze(url = "http://xitro.eu", driver = driver)
     print r
     driver.close()
