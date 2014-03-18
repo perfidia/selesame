@@ -5,7 +5,7 @@ import selesame
 from selenium import webdriver
 
 if __name__ == '__main__':
-    driver = webdriver.Chrome()
-    r = selesame.analyze(url = "http://www.fc.put.poznan.pl", driver = driver)
+    driver = webdriver.Firefox()
+    r = selesame.analyze(url = "http://www.xitro.eu", driver = driver)
     print r
     driver.close()
