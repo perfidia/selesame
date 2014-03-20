@@ -38,13 +38,15 @@ def analyze(url=None, driver=None):
         
          
         xpath = ""
+        print xnodes
         
         n = 0
         for i in reversed(xnodes):
             if n < len(xnodes) - 1:
                 xpath += "/%s" % i
             else:
-                xpath += "/[href=%s]" % i
+                if i != None:             
+                    xpath += "[href=%s]" % i
             n+=1
                 
         print xpath
