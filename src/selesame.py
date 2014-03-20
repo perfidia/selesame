@@ -6,37 +6,9 @@ from selenium.common.exceptions import NoSuchElementException
 from collections import defaultdict
 from collections import deque
 import re
+from lib2to3.tests.support import driver
 
-def getXPathFromNode(node):
-    """
-
-    :param node: WebElement took from selenium
-    :return: xpath of WebElement
-    """
-    
-    xnodes = [node.get_attribute("href"), node.tag_name]
-    while (node.tag_name != "html"):
-        node = node.parent()
-        xnodes.append(node.tag_name)
-    
-    xpath = ""
-    
-    for i in reversed(xnodes):
-        if i < len(xnodes)-1:
-            xpath += "/%s" % i
-        else:
-             xpath += "/[href=%s]" % node.get_attribute
-    
-    print xpath
-    return xpath
-
-def decorateLinkUrl(url, link):
-    if 'http://' not in link:
-        link = url + '/' + link
-    return link
-
-
-def analyze(url = None, driver = None):
+def analyze(url=None, driver=None):
     """
 	Analyze a given webpage and return list of elements with the same actions.
 
@@ -50,6 +22,44 @@ def analyze(url = None, driver = None):
 	:return: list of tuples with elements with same actions (xpaths inside)
 	:raises: ValueError
 	"""
+    
+    def get_xpath(node):
+        """
+    
+        :param node: WebElement took from selenium
+        :return: xpath of WebElement
+        """
+        
+        xnodes = [node.get_attribute("href"), node.tag_name]
+        
+        while (node.tag_name != "html"):
+            node = node.find_element_by_xpath('..')
+            xnodes.append(node.tag_name)
+        
+         
+        xpath = ""
+        
+        n = 0
+        for i in reversed(xnodes):
+            if n < len(xnodes) - 1:
+                xpath += "/%s" % i
+            else:
+                xpath += "/[href=%s]" % i
+            n+=1
+                
+        print xpath
+        return xpath
+    
+    #------------------------------------------------------
+    
+    def decorate_url(url, link):
+        if 'http://' not in link:
+            link = url + '/' + link
+        return link
+    
+    #------------------------------------------------------
+
+    
     if driver is None:
         # no parameter provided, create the default driver
         driver = webdriver.Chrome()
@@ -59,22 +69,26 @@ def analyze(url = None, driver = None):
     nodes = driver.find_elements_by_tag_name('a')
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
+    
     for node in nodes:
-        links[node.get_attribute('href')].append(getXPathFromNode(node))
+        links[node.get_attribute('href')].append(get_xpath(node))
+        
     for script in onclicks:
         found = re.findall("location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
+        
         for loc in found:
             href = loc.split("'")
-            links[decorateLinkUrl(url, href[1])].append(getXPathFromNode(script))
+            links[decorate_url(url, href[1])].append(get_xpath(script))
         found = re.findall('location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
+        
         for loc in found:
             href = loc.split('"')
             if 'http://' not in href[1]:
                 href[1] = url + '/' + href[1]
-            links[decorateLinkUrl(url, href[1])].append(getXPathFromNode(script))
+            links[decorate_url(url, href[1])].append(get_xpath(script))
     return links
 
-def get_same(url = None, driver = None, id = None, xpath = None):
+def get_same(url=None, driver=None, id=None, xpath=None):
     """
 	Analyze a given webpage and return a tuples with elements that have the same action as the one in id/xpath.
 
