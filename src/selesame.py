@@ -65,6 +65,8 @@ def analyze(url=None, driver=None):
     if driver is None:
         # no parameter provided, create the default driver
         driver = webdriver.Chrome()
+    if url == None:
+        raise ValueError("Provided URL is empty!")
     driver.get(url)
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
