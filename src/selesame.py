@@ -55,7 +55,7 @@ def analyze(url=None, driver=None):
     #------------------------------------------------------
     
     def decorate_url(url, link):
-        if 'http://' not in link:
+        if not link.startswith("http://"):
             link = url + '/' + link
         return link
     
