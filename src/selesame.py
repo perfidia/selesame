@@ -6,7 +6,6 @@ from selenium.common.exceptions import NoSuchElementException
 from collections import defaultdict
 from collections import deque
 import re
-from lib2to3.tests.support import driver
 
 def analyze(url=None, driver=None):
     """
@@ -60,14 +59,16 @@ def analyze(url=None, driver=None):
         return link
     
     #------------------------------------------------------
-
-    
+    selfdriver = False
     if driver is None:
         # no parameter provided, create the default driver
         driver = webdriver.Chrome()
-    if url == None:
+        selfdriver = True
+    # only checked in chrome
+    if (url == None and driver.current_url == u'data:,'):
         raise ValueError("Provided URL is empty!")
-    driver.get(url)
+    else:
+        driver.get(url)
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
     nodes = driver.find_elements_by_tag_name('a')
@@ -90,6 +91,8 @@ def analyze(url=None, driver=None):
             if 'http://' not in href[1]:
                 href[1] = url + '/' + href[1]
             links[decorate_url(url, href[1])].append(get_xpath(script))
+        if selfdriver:
+            driver.quit()
     return links
 
 def get_same(url=None, driver=None, id=None, xpath=None):
