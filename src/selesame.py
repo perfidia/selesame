@@ -28,37 +28,30 @@ def analyze(url=None, driver=None):
         :param node: WebElement took from selenium
         :return: xpath of WebElement
         """
+        href = node.get_attribute("href")
+
+        xnodes = [node.tag_name]
         
-        xnodes = [node.get_attribute("href"), node.tag_name]
-        
-        while (node.tag_name != "html"):
+        while node.tag_name != "html":
             node = node.find_element_by_xpath('..')
             xnodes.append(node.tag_name)
         
-         
-        xpath = ""
-        print xnodes
+        xpath = "/" + "/".join(reversed(xnodes))
+
+        if href is not None:
+            xpath+="[@href='%s']" % href
         
-        n = 0
-        for i in reversed(xnodes):
-            if n < len(xnodes) - 1:
-                xpath += "/%s" % i
-            else:
-                if i != None:             
-                    xpath += "[href=%s]" % i
-            n+=1
-                
-        print xpath
         return xpath
     
     #------------------------------------------------------
-    
+
     def decorate_url(url, link):
         if not link.startswith("http://"):
-            link = url + '/' + link
+            link = url + link
         return link
-    
+
     #------------------------------------------------------
+
     selfdriver = False
     if driver is None:
         # no parameter provided, create the default driver
@@ -77,22 +70,20 @@ def analyze(url=None, driver=None):
     
     for node in nodes:
         links[node.get_attribute('href')].append(get_xpath(node))
-        
+
     for script in onclicks:
         found = re.findall("location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
-        
         for loc in found:
             href = loc.split("'")
             links[decorate_url(url, href[1])].append(get_xpath(script))
+
         found = re.findall('location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
-        
         for loc in found:
             href = loc.split('"')
-            if 'http://' not in href[1]:
-                href[1] = url + '/' + href[1]
             links[decorate_url(url, href[1])].append(get_xpath(script))
-        if selfdriver:
-            driver.quit()
+
+    if selfdriver:
+        driver.quit()
     return links
 
 def get_same(url=None, driver=None, id=None, xpath=None):
@@ -115,5 +106,36 @@ def get_same(url=None, driver=None, id=None, xpath=None):
 	:return: tuples with elements with the same actions as the one in parameters (xpaths inside, last xpath is a parameter)
 	:raises: ValueError
 	"""
+    selfdriver = False
+    if driver is None:
+        # no parameter provided, create the default driver
+        driver = webdriver.Chrome()
+        selfdriver = True
 
-    pass
+    if (url == None and driver.current_url == u'data:,'):
+        raise ValueError("Provided URL is empty!")
+    else:
+        driver.get(url)
+    # when server does a redirect the url is mismatched with actual site
+    url = driver.current_url
+
+    if id is not None:
+        element = driver.find_element_by_id(id)
+    elif xpath is not None:
+        try:
+            element = driver.find_element_by_xpath(xpath)
+        except NoSuchElementException:
+            element = driver.find_element_by_xpath(xpath.replace(url, ''))
+    else:
+        raise ValueError
+
+    href = element.get_attribute('href')
+
+    links = analyze(url, driver)
+
+    same = links[href]
+
+    if selfdriver:
+        driver.quit()
+
+    return same

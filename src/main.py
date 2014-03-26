@@ -9,3 +9,5 @@ if __name__ == '__main__':
     r = selesame.analyze(url = "http://www.xitro.eu", driver = driver)
     print r
     driver.close()
+
+    print selesame.get_same(url = "http://www.xitro.eu", xpath="/html/body/nav/ul/li/a[@href='http://xitro.eu/duplicated_script.html']")
