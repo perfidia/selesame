@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Xitro's Nest</title>
+</head>
+<body>
+    <i onclick="documentloc()">Welcome.</i> It's a test page for <strong id="selesame">Selesame</strong> github project.
+    <nav><ul>
+        <li><a href="test.html">Test Link</a></li>
+        <li><a href="duplicated.html">Duplicated Link</a></li>
+        <li><a href="duplicated_script.html">Duplicated Script Link</a></li>
+    </ul>
+    </nav>
+    <footer>
+        <a href="duplicated.html">Footer Link</a>
+        <p onclick="window.location = 'duplicated_script.html'">&copy; 2014 Dawid Wengrzik, Krzysztof Mosek.</p>
+    </footer>
+    <script>
+        document.getElementById("selesame").onclick = function realScriptLink() {window.location = 'duplicated_realscript.html'}
+        function documentloc() {
+            document.location='duplicated_realscript.html'
+        }
+    </script>
+</body>
+</html>
