@@ -1,48 +1,69 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from selenium import webdriver
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.common.exceptions import NoSuchElementException
-from collections import defaultdict
-from collections import deque
+
 import re
+from collections import deque
+from collections import defaultdict
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.remote.webdriver import WebDriver
 
 def analyze(url=None, driver=None):
     """
-	Analyze a given webpage and return list of elements with the same actions.
+    Analyze a given webpage and return list of elements with the same actions.
 
-	Raise ValueError if both url and driver are (not) None.
-	... description of other exceptions ...
+    Raise ValueError if both url and driver are (not) None.
+    ... description of other exceptions ...
 
-	:param url: text with url to analyze
-	:type url: str
-	:param driver: selenium driver with loaded page
-	:type driver: WebDriver
-	:return: list of tuples with elements with same actions (xpaths inside)
-	:raises: ValueError
-	"""
-    
+    :param url: text with url to analyze
+    :type url: str
+    :param driver: selenium driver with loaded page
+    :type driver: WebDriver
+    :return: list of tuples with elements with same actions (xpaths inside)
+    :raises: ValueError
+    """
+
     def get_xpath(node):
         """
-    
+
         :param node: WebElement took from selenium
-        :return: xpath of WebElement
+        :type node: WebElement
+        :return: xpath to a node
+        :rtype: str
         """
-        href = node.get_attribute("href")
 
-        xnodes = [node.tag_name]
-        
-        while node.tag_name != "html":
-            node = node.find_element_by_xpath('..')
-            xnodes.append(node.tag_name)
-        
-        xpath = "/" + "/".join(reversed(xnodes))
+        id = node.get_attribute("id")
 
-        if href is not None:
-            xpath+="[@href='%s']" % href
-        
-        return xpath
-    
+        if id:
+            return '//*[@id="%s"]' % id
+
+        # extremely time consuming approach :(
+
+        debug = False
+
+        if debug: print "ping",
+
+        path = deque()
+
+        while node.tag_name != 'html':
+            p = node.find_element_by_xpath("..")
+            d = defaultdict(int)
+            for j in p.find_elements_by_xpath('*'):
+                d[j.tag_name] += 1
+                if j.text == node.text:
+                    path.appendleft(
+                            "%s%s" % (j.tag_name, "[%s]" % d[j.tag_name] if d[j.tag_name] != 1 else "")
+                    )
+                    break
+            node = p
+            del d
+
+        path.appendleft(node.tag_name)
+
+        if debug: print "pong"
+
+        return "/" + "/".join(path)
+
     #------------------------------------------------------
 
     def decorate_url(url, link):
@@ -67,7 +88,7 @@ def analyze(url=None, driver=None):
     nodes = driver.find_elements_by_tag_name('a')
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
-    
+
     for node in nodes:
         links[node.get_attribute('href')].append(get_xpath(node))
 
@@ -88,24 +109,24 @@ def analyze(url=None, driver=None):
 
 def get_same(url=None, driver=None, id=None, xpath=None):
     """
-	Analyze a given webpage and return a tuples with elements that have the same action as the one in id/xpath.
+    Analyze a given webpage and return a tuples with elements that have the same action as the one in id/xpath.
 
-	Raise ValueError if both url and driver are (not) None.
-	Raise ValueError if both id and xpath are (not) None.
-	Raise ValueError if id or xpath does not exist.
-	... description of other exceptions ...
+    Raise ValueError if both url and driver are (not) None.
+    Raise ValueError if both id and xpath are (not) None.
+    Raise ValueError if id or xpath does not exist.
+    ... description of other exceptions ...
 
-	:param url: text with url to analyze
-	:type url: str
-	:param driver: selenium driver with loaded page
-	:type driver: WebDriver
-	:param id: id of an element in a webpage
-	:type id: str
-	:param xpath: xpath to an element in a webpage (using selenium notation)
-	:type xpath: str
-	:return: tuples with elements with the same actions as the one in parameters (xpaths inside, last xpath is a parameter)
-	:raises: ValueError
-	"""
+    :param url: text with url to analyze
+    :type url: str
+    :param driver: selenium driver with loaded page
+    :type driver: WebElement
+    :param id: id of an element in a webpage
+    :type id: str
+    :param xpath: xpath to an element in a webpage (using selenium notation)
+    :type xpath: str
+    :return: tuples with elements with the same actions as the one in parameters (xpaths inside, last xpath is a parameter)
+    :raises: ValueError
+    """
     selfdriver = False
     if driver is None:
         # no parameter provided, create the default driver
