@@ -7,20 +7,19 @@ from selenium import webdriver
 if __name__ == '__main__':
     driver = webdriver.Firefox()
 
-    print "-" * 80
     print "selesame.analyze()"
-    print "-" * 80
     print selesame.analyze(
             url = "http://www.xitro.eu",
             driver = driver
     )
 
-    print "-" * 80
+    print
+
     print "selesame.get_same()"
-    print "-" * 80
     print selesame.get_same(
             url = "http://www.xitro.eu",
             driver = driver,
-            xpath = "/html/body/footer/p")
+            xpath = "/html/body/footer/p"
+    )
 
     driver.close()
