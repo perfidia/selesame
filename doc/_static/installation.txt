@@ -10,3 +10,24 @@ The following libraries are required:
         .. code-block:: bash
 
             easy_install selenium
+            
+
+Installation of python 2.7:
+
+Visit following website: https://www.python.org/download/releases/2.7/ 
+and download interested format. After that install python 2.7 on your machine.
+
+
+Installation of python-setuptools:
+
+Visit following website: https://pypi.python.org/pypi/setuptools#installing-and-using-setuptools
+and follow the instructions.
+
+
+Installation of selenium:
+
+Visit following website: https://pypi.python.org/pypi/selenium
+and follow the instructions.
+
+
+
