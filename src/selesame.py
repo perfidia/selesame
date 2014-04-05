@@ -19,7 +19,7 @@ def analyze(url=None, driver=None):
     :type url: str
     :param driver: selenium driver with loaded page
     :type driver: WebDriver
-    :return: list of tuples with elements with same actions (xpaths inside)
+    :return: deque with elements with same actions (xpaths inside)
     :raises: ValueError
     """
 
