@@ -1,5 +1,14 @@
 Usage
 =====
 
-Below a number of usage examples are presented.
+In order to use functions: analyze and get_same you can use following statements:
 
+samples of analyze:
+
+selesame.analyze(url = "http://wikipedia.org", driver = webdriver.Firefox);
+selesame.analyze(url = "http://allegro.pl", driver = webdriver.Chrome);
+
+samples of get_same:
+
+selesame.get_same(url = "http://www.xitro.eu",  driver = webdriver.Firefox, xpath = "/html/body/footer/p")
+selesame.get_same(url = "http://allegro.pl",  driver = webdriver.Chrome, xpath = "/html/body/div[4]/div[2]/div/div/ul/li[1]/div/a/strong")
