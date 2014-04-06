@@ -23,9 +23,8 @@ def analyze(url=None, driver=None):
     :raises: ValueError
     """
 
-    def get_xpath(node):
+    def get_xpath(node, url):
         """
-
         :param node: WebElement took from selenium
         :type node: WebElement
         :return: xpath to a node
@@ -37,6 +36,36 @@ def analyze(url=None, driver=None):
         if id:
             return '//*[@id="%s"]' % id
 
+        xnodes = [node.get_attribute("href"), node.tag_name]
+
+        while (node.tag_name != "html"):
+            node = node.find_element_by_xpath('..')
+            xnodes.append(node.tag_name)
+
+        xpath = ""
+
+        n = 0
+        for i in reversed(xnodes):
+            if n < len(xnodes) - 1:
+                xpath += "/%s" % i
+            else:
+                if i != None:
+                    xpath += "[contains(@href, %s)]" % i.replace(url, '')
+            n+=1
+
+        test = node.find_elements_by_xpath(xpath)
+
+        if len(test) > 1 : return xpath
+        else: return get_exact_xpath(node)
+
+
+    def get_exact_xpath(node) :
+        """
+        :param node: WebElement took from selenium
+        :type node: WebElement
+        :return: xpath to a node
+        :rtype: str
+        """
         # extremely time consuming approach :(
 
         debug = False
@@ -90,18 +119,18 @@ def analyze(url=None, driver=None):
     links = defaultdict(deque)
 
     for node in nodes:
-        links[node.get_attribute('href')].append(get_xpath(node))
+        links[node.get_attribute('href')].append(get_xpath(node, url))
 
     for script in onclicks:
         found = re.findall("location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
         for loc in found:
             href = loc.split("'")
-            links[decorate_url(url, href[1])].append(get_xpath(script))
+            links[decorate_url(url, href[1])].append(get_xpath(script, url))
 
         found = re.findall('location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
         for loc in found:
             href = loc.split('"')
-            links[decorate_url(url, href[1])].append(get_xpath(script))
+            links[decorate_url(url, href[1])].append(get_xpath(script, url))
 
     if selfdriver:
         driver.quit()
@@ -119,12 +148,12 @@ def get_same(url=None, driver=None, id=None, xpath=None):
     :param url: text with url to analyze
     :type url: str
     :param driver: selenium driver with loaded page
-    :type driver: WebElement
+    :type driver: WebDriver
     :param id: id of an element in a webpage
     :type id: str
     :param xpath: xpath to an element in a webpage (using selenium notation)
     :type xpath: str
-    :return: tuples with elements with the same actions as the one in parameters (xpaths inside, last xpath is a parameter)
+    :return: deque with elements with the same actions as the one in parameters
     :raises: ValueError
     """
     selfdriver = False
@@ -146,7 +175,7 @@ def get_same(url=None, driver=None, id=None, xpath=None):
         try:
             element = driver.find_element_by_xpath(xpath)
         except NoSuchElementException:
-            element = driver.find_element_by_xpath(xpath.replace(url, ''))
+            print "NoSuchElement"
     else:
         raise ValueError
 
