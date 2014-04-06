@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 
-def analyze(url=None, driver=None):
+def analyze(url=None, driver=None, mode=0):
     """
     Analyze a given webpage and return list of elements with the same actions.
 
@@ -19,6 +19,8 @@ def analyze(url=None, driver=None):
     :type url: str
     :param driver: selenium driver with loaded page
     :type driver: WebDriver
+    :param mode: defines way analyze function should work 0: Analize all, 1: analize only href, 2: analize only onclick
+    :type mode: int
     :return: deque with elements with same actions (xpaths inside)
     :raises: ValueError
     """
@@ -66,7 +68,7 @@ def analyze(url=None, driver=None):
         :return: xpath to a node
         :rtype: str
         """
-        # extremely time consuming approach :(
+        # extremely time consuming approach :(, not working in chrome
 
         debug = False
 
@@ -77,7 +79,8 @@ def analyze(url=None, driver=None):
         while node.tag_name != 'html':
             p = node.find_element_by_xpath("..")
             d = defaultdict(int)
-            for j in p.find_elements_by_xpath('*'):
+            elements = p.find_elements_by_xpath('*')
+            for j in elements:
                 d[j.tag_name] += 1
                 if j.text == node.text:
                     path.appendleft(
@@ -117,28 +120,28 @@ def analyze(url=None, driver=None):
     nodes = driver.find_elements_by_tag_name('a')
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
+    if mode < 2 :
+        for node in nodes:
+            links[node.get_attribute('href')].append(get_xpath(node, url))
+    if mode == 0 or mode == 2:
+        for script in onclicks:
+            found = re.findall(r"location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
+            for loc in found:
+                href = loc.split("'")
+                links[decorate_url(url, href[1])].append(get_xpath(script, url))
 
-    for node in nodes:
-        links[node.get_attribute('href')].append(get_xpath(node, url))
-
-    for script in onclicks:
-        found = re.findall("location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
-        for loc in found:
-            href = loc.split("'")
-            links[decorate_url(url, href[1])].append(get_xpath(script, url))
-
-        found = re.findall('location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
-        for loc in found:
-            href = loc.split('"')
-            links[decorate_url(url, href[1])].append(get_xpath(script, url))
+            found = re.findall(r'location[ ]*=[ ]*"[^"]+"', script.get_attribute('onclick'))
+            for loc in found:
+                href = loc.split('"')
+                links[decorate_url(url, href[1])].append(get_xpath(script, url))
 
     if selfdriver:
         driver.quit()
     return links
 
-def get_same(url=None, driver=None, id=None, xpath=None):
+def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
     """
-    Analyze a given webpage and return a tuples with elements that have the same action as the one in id/xpath.
+    Analyze a given webpage and return a deque with elements that have the same action as the one in id/xpath.
 
     Raise ValueError if both url and driver are (not) None.
     Raise ValueError if both id and xpath are (not) None.
@@ -153,6 +156,8 @@ def get_same(url=None, driver=None, id=None, xpath=None):
     :type id: str
     :param xpath: xpath to an element in a webpage (using selenium notation)
     :type xpath: str
+    :param mode: defines way analyze function should work 0: Analize all, 1: analize only href, 2: analize only onclick
+    :type mode: int
     :return: deque with elements with the same actions as the one in parameters
     :raises: ValueError
     """
@@ -180,8 +185,25 @@ def get_same(url=None, driver=None, id=None, xpath=None):
         raise ValueError
 
     href = element.get_attribute('href')
+    if href is None:
+        found = re.findall(r"location[ ]*=[ ]*'[^']+'", element.get_attribute('onclick'))
+        for loc in found:
+            splited = loc.split("'")
+            href = splited[1]
 
-    links = analyze(url, driver)
+    if href is None:
+        found = re.findall(r'location[ ]*=[ ]*"[^"]+"', element.get_attribute('onclick'))
+        for loc in found:
+            splited = loc.split('"')
+            href = splited[1]
+
+    if href is None:
+        raise ValueError
+
+    if not href.startswith("http://"):
+        href = url + href
+
+    links = analyze(url, driver, mode)
 
     same = links[href]
 
