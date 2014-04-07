@@ -3,16 +3,20 @@ API
 
 This software uses python 2.7 and selenium.
 
-analyze(url=None, driver=None):
-  
-    Description: Analyze a given webpage and return list of elements with the same actions. 
-                 Raise ValueError if both url and driver are (not) None.
+def analyze(url=None, driver=None, mode=0):
+
+    Description: Analyze a given webpage and return list of elements with the same actions.
+                 Be aware of few modes u can use ! Read param mode description.
+
+    Raise ValueError if both url and driver are (not) None.
 
     :param url: text with url to analyze
     :type url: str
     :param driver: selenium driver with loaded page
     :type driver: WebDriver
-    :return: dict  with deque (keys are URL's) 
+    :param mode: defines way analyze function should work 0: Analize all, 1: analize only href, 2: analize only onclick
+    :type mode: int
+    :return: deque with elements with same actions (xpaths inside)
     :raises: ValueError
 
 
@@ -21,6 +25,7 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
 
     Description: Analyze a given webpage and return a deque with elements that have the same action
                  as the one in id/xpath.
+                 Be aware of few modes u can use ! Read param mode description.
 
     Raise ValueError if both url and driver are (not) None.
     Raise ValueError if both id and xpath are (not) None.
