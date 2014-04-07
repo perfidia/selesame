@@ -12,7 +12,7 @@ analyze(url=None, driver=None):
     :type url: str
     :param driver: selenium driver with loaded page
     :type driver: WebDriver
-    :return: deque with elements with same actions (xpaths inside)
+    :return: dict  with deque (keys are URL's) 
     :raises: ValueError
 
 
@@ -31,5 +31,28 @@ get_same(url=None, driver=None, id=None, xpath=None):
     :type id: str
     :param xpath: xpath to an element in a webpage (using selenium notation)
     :type xpath: str
-    :return: tuples with elements with the same actions as the one in parameters (xpaths inside, last xpath is a parameter)
+    :return: deque with elements with the same actions as the one in parameters (xpaths inside, last xpath is a parameter)
+    :raises: ValueError
+
+def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
+
+
+    Description: Analyze a given webpage and return a deque with elements that have the same action
+                 as the one in id/xpath.
+
+    Raise ValueError if both url and driver are (not) None.
+    Raise ValueError if both id and xpath are (not) None.
+    Raise ValueError if id or xpath does not exist.
+
+    :param url: text with url to analyze
+    :type url: str
+    :param driver: selenium driver with loaded page
+    :type driver: WebDriver
+    :param id: id of an element in a webpage
+    :type id: str
+    :param xpath: xpath to an element in a webpage (using selenium notation)
+    :type xpath: str
+    :param mode: defines way analyze function should work 0: Analize all, 1: analize only href, 2: analize only onclick
+    :type mode: int
+    :return: deque with elements with the same actions as the one in parameters
     :raises: ValueError
