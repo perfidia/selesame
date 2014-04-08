@@ -4,8 +4,6 @@ Overview
 Purpose of our software is creating a very useful tool, which analyze clickable web elements whitin specified webpage, 
 that showing the same results. 
 
-Example: http://www.wikipedia.org/
-
 When you visit main page of wikipedia, it's very easy to spot, that it's is possible to reach http://en.wikipedia.org/wiki/Main_Page
 in serveal ways (e.g. either clicking English language near the logo or English language listed on the bottom of the page.
 
