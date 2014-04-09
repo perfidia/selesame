@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 
+
 def analyze(url=None, driver=None, mode=0):
     """
     Analyze a given webpage and return list of elements with the same actions.
@@ -51,17 +52,18 @@ def analyze(url=None, driver=None, mode=0):
             if n < len(xnodes) - 1:
                 xpath += "/%s" % i
             else:
-                if i != None:
+                if i is not None:
                     xpath += "[contains(@href, %s)]" % i.replace(url, '')
-            n+=1
+            n += 1
 
         test = node.find_elements_by_xpath(xpath)
 
-        if len(test) > 1 : return xpath
-        else: return get_exact_xpath(node)
+        if len(test):
+            return xpath
+        
+        return get_exact_xpath(node)
 
-
-    def get_exact_xpath(node) :
+    def get_exact_xpath(node):
         """
         :param node: WebElement took from selenium
         :type node: WebElement
@@ -72,7 +74,8 @@ def analyze(url=None, driver=None, mode=0):
 
         debug = False
 
-        if debug: print "ping",
+        if debug: 
+            print "ping",
 
         path = deque()
 
@@ -92,7 +95,8 @@ def analyze(url=None, driver=None, mode=0):
 
         path.appendleft(node.tag_name)
 
-        if debug: print "pong"
+        if debug: 
+            print "pong"
 
         return "/" + "/".join(path)
 
@@ -111,7 +115,7 @@ def analyze(url=None, driver=None, mode=0):
         driver = webdriver.Chrome()
         selfdriver = True
     # only checked in chrome
-    if (url == None and driver.current_url == u'data:,'):
+    if (url is None and driver.current_url == u'data:,'):
         raise ValueError("Provided URL is empty!")
     else:
         driver.get(url)
@@ -120,7 +124,7 @@ def analyze(url=None, driver=None, mode=0):
     nodes = driver.find_elements_by_tag_name('a')
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
-    if mode < 2 :
+    if mode < 2:
         for node in nodes:
             links[node.get_attribute('href')].append(get_xpath(node, url))
     if mode == 0 or mode == 2:
@@ -138,6 +142,7 @@ def analyze(url=None, driver=None, mode=0):
     if selfdriver:
         driver.quit()
     return links
+
 
 def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
     """
@@ -167,7 +172,7 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
         driver = webdriver.Chrome()
         selfdriver = True
 
-    if (url == None and driver.current_url == u'data:,'):
+    if url is None and driver.current_url == u'data:,':
         raise ValueError("Provided URL is empty!")
     else:
         driver.get(url)
