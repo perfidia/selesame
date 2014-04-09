@@ -9,7 +9,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
-def analyze(url=None, driver=None, mode=0):
+def analyze(url=None, driver=None, mode="all"):
     """
     Analyze a given webpage and return list of elements with the same actions.
 
@@ -20,8 +20,8 @@ def analyze(url=None, driver=None, mode=0):
     :type url: str
     :param driver: selenium driver with loaded page
     :type driver: WebDriver
-    :param mode: defines way analyze function should work 0: Analize all, 1: analize only href, 2: analize only onclick
-    :type mode: int
+    :param mode: defines way analyze function should work "all": Analize all, "href": analize only href, "onclick": analize only onclick
+    :type mode: string
     :return: deque with elements with same actions (xpaths inside)
     :raises: ValueError
     """
@@ -124,10 +124,10 @@ def analyze(url=None, driver=None, mode=0):
     nodes = driver.find_elements_by_tag_name('a')
     onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
-    if mode < 2:
+    if mode is "all" or mode is "href":
         for node in nodes:
             links[node.get_attribute('href')].append(get_xpath(node, url))
-    if mode == 0 or mode == 2:
+    if mode is "all" or mode is "onclick":
         for script in onclicks:
             found = re.findall(r"location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
             for loc in found:
@@ -144,7 +144,7 @@ def analyze(url=None, driver=None, mode=0):
     return links
 
 
-def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
+def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
     """
     Analyze a given webpage and return a deque with elements that have the same action as the one in id/xpath.
 
@@ -161,8 +161,8 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode=0):
     :type id: str
     :param xpath: xpath to an element in a webpage (using selenium notation)
     :type xpath: str
-    :param mode: defines way analyze function should work 0: Analize all, 1: analize only href, 2: analize only onclick
-    :type mode: int
+    :param mode: defines way analyze function should work "all": Analize all, "href": analize only href, "onclick": analize only onclick
+    :type mode: string
     :return: deque with elements with the same actions as the one in parameters
     :raises: ValueError
     """
