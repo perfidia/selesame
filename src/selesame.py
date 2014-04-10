@@ -60,7 +60,7 @@ def analyze(url=None, driver=None, mode="all"):
 
         if len(test):
             return xpath
-        
+
         return get_exact_xpath(node)
 
     def get_exact_xpath(node):
@@ -74,7 +74,7 @@ def analyze(url=None, driver=None, mode="all"):
 
         debug = False
 
-        if debug: 
+        if debug:
             print "ping",
 
         path = deque()
@@ -95,7 +95,7 @@ def analyze(url=None, driver=None, mode="all"):
 
         path.appendleft(node.tag_name)
 
-        if debug: 
+        if debug:
             print "pong"
 
         return "/" + "/".join(path)
@@ -110,15 +110,23 @@ def analyze(url=None, driver=None, mode="all"):
     #------------------------------------------------------
 
     selfdriver = False
+
     if driver is None:
         # no parameter provided, create the default driver
         driver = webdriver.Chrome()
         selfdriver = True
-    # only checked in chrome
-    if (url is None and driver.current_url == u'data:,'):
+
+    condition = True
+    if isinstance(driver, webdriver.Chrome):
+        condition = driver.current_url == u'data:,'
+    elif isinstance(driver, webdriver.Firefox):
+        condition = driver.current_url == u'about:blank'
+
+    if url is None and condition:
         raise ValueError("Provided URL is empty!")
-    else:
+    elif url:
         driver.get(url)
+
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
     nodes = driver.find_elements_by_tag_name('a')
