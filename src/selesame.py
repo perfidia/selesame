@@ -40,6 +40,7 @@ def analyze(url=None, driver=None, mode="all"):
             return '//*[@id="%s"]' % id
 
         xnodes = [node.get_attribute("href"), node.tag_name]
+        target = node
 
         while (node.tag_name != "html"):
             node = node.find_element_by_xpath('..')
@@ -61,7 +62,7 @@ def analyze(url=None, driver=None, mode="all"):
         if len(test):
             return xpath
 
-        return get_exact_xpath(node)
+        return get_exact_xpath(target)
 
     def get_exact_xpath(node):
         """
