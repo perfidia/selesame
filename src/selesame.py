@@ -13,8 +13,7 @@ def analyze(url=None, driver=None, mode="all"):
     """
     Analyze a given webpage and return list of elements with the same actions.
 
-    Raise ValueError if both url and driver are (not) None.
-    ... description of other exceptions ...
+    Raise ValueError if url is None and condition equals True.
 
     :param url: text with url to analyze
     :type url: str
@@ -157,10 +156,9 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
     """
     Analyze a given webpage and return a deque with elements that have the same action as the one in id/xpath.
 
-    Raise ValueError if both url and driver are (not) None.
-    Raise ValueError if both id and xpath are (not) None.
-    Raise ValueError if id or xpath does not exist.
-    ... description of other exceptions ...
+    Raise ValueError if url is None and condition equals True.
+    Raise ValueError if both id and xpath are None.
+    Raise ValueError if href is None.
 
     :param url: text with url to analyze
     :type url: str
