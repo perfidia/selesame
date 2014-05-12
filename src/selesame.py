@@ -32,8 +32,8 @@ def analyze(url=None, driver=None, mode="all"):
         :return: xpath to a node
         :rtype: str
         """
-
         id = node.get_attribute("id")
+
 
         if id:
             return '//*[@id="%s"]' % id
@@ -187,14 +187,17 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
     url = driver.current_url
 
     if id is not None:
-        element = driver.find_element_by_id(id)
+        try:
+            element = driver.find_element_by_id(id)
+        except NoSuchElementException:
+            raise ValueError("There are no existing elements with such id.")
     elif xpath is not None:
         try:
             element = driver.find_element_by_xpath(xpath)
         except NoSuchElementException:
-            print "NoSuchElement"
+            raise ValueError("There are no existing elements with such xpath.")
     else:
-        raise ValueError
+        raise ValueError("No id or xpath were provided.")
 
     href = element.get_attribute('href')
     if href is None:
@@ -210,7 +213,7 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
             href = splited[1]
 
     if href is None:
-        raise ValueError
+        raise ValueError("Selected element is not a link.")
 
     if not href.startswith("http://"):
         href = url + href
