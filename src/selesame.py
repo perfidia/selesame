@@ -103,7 +103,10 @@ def analyze(url=None, driver=None, mode="all"):
 
     def decorate_url(url, link):
         if not link.startswith("http://"):
-            link = url + link
+            if url.endswith("/"):
+                link = url + link
+            else:
+                link = url.rsplit('/', 1)[0] + "/" + link
         return link
 
     #------------------------------------------------------
