@@ -129,13 +129,13 @@ def analyze(url=None, driver=None, mode="all"):
 
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
-    nodes = driver.find_elements_by_tag_name('a')
-    onclicks = driver.find_elements_by_xpath('//*[@onclick]')
     links = defaultdict(deque)
     if mode is "all" or mode is "href":
+        nodes = driver.find_elements_by_tag_name('a')
         for node in nodes:
             links[node.get_attribute('href')].append(get_xpath(node, url))
     if mode is "all" or mode is "onclick":
+        onclicks = driver.find_elements_by_xpath('//*[@onclick]')
         for script in onclicks:
             found = re.findall(r"location[ ]*=[ ]*'[^']+'", script.get_attribute('onclick'))
             for loc in found:
