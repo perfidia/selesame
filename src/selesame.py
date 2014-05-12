@@ -8,7 +8,6 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 
-
 def analyze(url=None, driver=None, mode="all"):
     """
     Analyze a given webpage and return list of elements with the same actions.
@@ -53,7 +52,7 @@ def analyze(url=None, driver=None, mode="all"):
                 xpath += "/%s" % i
             else:
                 if i is not None:
-                    xpath += "[contains(@href, %s)]" % i.replace(url, '')
+                    xpath += "[contains(@href, \"%s\")]" % i.replace(url, '')
             n += 1
 
         test = node.find_elements_by_xpath(xpath)
