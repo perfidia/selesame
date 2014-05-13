@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 
-def analyze(url=None, driver=None, mode="all"):
+def analyze(url=None, driver=None, mode="all", unique=False):
     """
     Analyze a given webpage and return list of elements with the same actions.
 
@@ -18,8 +18,10 @@ def analyze(url=None, driver=None, mode="all"):
     :type url: str
     :param driver: selenium driver with loaded page
     :type driver: WebDriver
-    :param mode: defines way analyze function should work "all": Analize all, "href": analize only href, "onclick": analize only onclick
+    :param mode: defines way analyze function should work "all": Analyze all, "href": analyze only href, "onclick": analyze only onclick
     :type mode: string
+    :param unique: defines should analyze include links occurred only once in website
+    :type unique: bool
     :return: deque with elements with same actions (xpaths inside)
     :raises: ValueError
     """
@@ -69,7 +71,7 @@ def analyze(url=None, driver=None, mode="all"):
         :return: xpath to a node
         :rtype: str
         """
-        # extremely time consuming approach :(, not working in chrome
+        # extremely time consuming approach :(
 
         debug = False
 
@@ -151,6 +153,13 @@ def analyze(url=None, driver=None, mode="all"):
 
     if selfdriver:
         driver.quit()
+
+    if not unique:
+        removable = []
+        for key in links:
+            if len(links[key]) < 2: removable.append(key)
+        for key in removable:
+            del links[key]
     return links
 
 
@@ -220,7 +229,7 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
     if not href.startswith("http://"):
         href = url + href
 
-    links = analyze(url, driver, mode)
+    links = analyze(url, driver, mode, True)
 
     same = links[href]
 
