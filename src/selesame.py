@@ -20,7 +20,7 @@ def analyze(url=None, driver=None, mode="all", unique=False):
     :type driver: WebDriver
     :param mode: parameter to define what elements of loaded page should be scanned "all": Analyze all, "href": analyze only href links, "onclick": analyze only onclick location change
     :type mode: string
-    :param unique: If true, analyze would also return elements with actions which occurred only once on loaded page
+    :param unique: If True, analyze would also return elements with actions which occurred only once on loaded page
     :type unique: bool
     :return: defaultdict with elements with same actions. Key is target href and values are deque of xpaths.
     :rtype: defaultdict(deque)
@@ -102,6 +102,14 @@ def analyze(url=None, driver=None, mode="all", unique=False):
     #------------------------------------------------------
 
     def decorate_url(url, link):
+        """
+        :param url: loaded page url
+        :type url: string
+        :param link: link target
+        :type link: string
+        :return: link target with loaded page domain
+        :rtype: str
+        """
         if not link.startswith("http://"):
             if url.endswith("/"):
                 link = url + link
@@ -168,18 +176,22 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
     Raise ValueError if url is None and condition equals True.
     Raise ValueError if both id and xpath are None.
     Raise ValueError if href is None.
+    Raise ValueError if it can't find id
+    Raise ValueError if it can't find xpath target
+    Raise ValueError if id and xpath is None.
 
-    :param url: text with url to analyze
+    :param url: url of website that should be analyzed for same action elements. If none provided, loaded page of driver is used instead.
     :type url: str
-    :param driver: selenium driver with loaded page
+    :param driver: selenium driver with or without loaded page
     :type driver: WebDriver
     :param id: id of an element in a webpage
     :type id: str
     :param xpath: xpath to an element in a webpage (using selenium notation)
     :type xpath: str
-    :param mode: defines way analyze function should work "all": Analize all, "href": analize only href, "onclick": analize only onclick
+    :param mode: parameter to define what elements of loaded page should be scanned "all": Analyze all, "href": analyze only href links, "onclick": analyze only onclick location change
     :type mode: string
     :return: deque with elements with the same actions as the one in parameters
+    :rtype: deque
     :raises: ValueError
     """
     selfdriver = False
@@ -188,9 +200,15 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
         driver = webdriver.Chrome()
         selfdriver = True
 
-    if url is None and driver.current_url == u'data:,':
+    condition = True
+    if isinstance(driver, webdriver.Chrome):
+        condition = driver.current_url == u'data:,'
+    elif isinstance(driver, webdriver.Firefox):
+        condition = driver.current_url == u'about:blank'
+
+    if url is None and condition:
         raise ValueError("Provided URL is empty!")
-    else:
+    elif url:
         driver.get(url)
     # when server does a redirect the url is mismatched with actual site
     url = driver.current_url
@@ -199,12 +217,12 @@ def get_same(url=None, driver=None, id=None, xpath=None, mode="all"):
         try:
             element = driver.find_element_by_id(id)
         except NoSuchElementException:
-            raise ValueError("There are no existing elements with such id.")
+            raise ValueError("Id not found.")
     elif xpath is not None:
         try:
             element = driver.find_element_by_xpath(xpath)
         except NoSuchElementException:
-            raise ValueError("There are no existing elements with such xpath.")
+            raise ValueError("Xpath target not found.")
     else:
         raise ValueError("No id or xpath were provided.")
 
