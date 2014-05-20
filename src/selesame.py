@@ -14,15 +14,16 @@ def analyze(url=None, driver=None, mode="all", unique=False):
 
     Raise ValueError if url is None and condition equals True.
 
-    :param url: text with url to analyze
+    :param url: url of website that should be analyzed for same action elements. If none provided, loaded page of driver is used instead.
     :type url: str
-    :param driver: selenium driver with loaded page
+    :param driver: selenium driver with or without loaded page
     :type driver: WebDriver
-    :param mode: defines way analyze function should work "all": Analyze all, "href": analyze only href, "onclick": analyze only onclick
+    :param mode: parameter to define what elements of loaded page should be scanned "all": Analyze all, "href": analyze only href links, "onclick": analyze only onclick location change
     :type mode: string
-    :param unique: defines should analyze include links occurred only once in website
+    :param unique: If true, analyze would also return elements with actions which occurred only once on loaded page
     :type unique: bool
-    :return: deque with elements with same actions (xpaths inside)
+    :return: defaultdict with elements with same actions. Key is target href and values are deque of xpaths.
+    :rtype: defaultdict(deque)
     :raises: ValueError
     """
 
@@ -48,18 +49,16 @@ def analyze(url=None, driver=None, mode="all", unique=False):
 
         xpath = ""
 
-        n = 0
-        for i in reversed(xnodes):
+        for n, i in enumerate(reversed(xnodes)):
             if n < len(xnodes) - 1:
                 xpath += "/%s" % i
             else:
                 if i is not None:
                     xpath += "[contains(@href, \"%s\")]" % i.replace(url, '')
-            n += 1
 
         test = node.find_elements_by_xpath(xpath)
 
-        if len(test):
+        if len(test) == 1:
             return xpath
 
         return get_exact_xpath(target)
@@ -68,36 +67,35 @@ def analyze(url=None, driver=None, mode="all", unique=False):
         """
         :param node: WebElement took from selenium
         :type node: WebElement
-        :return: xpath to a node
+        :return: xpath to a unique node
         :rtype: str
         """
-        # extremely time consuming approach :(
-
-        debug = False
-
-        if debug:
-            print "ping",
-
         path = deque()
+        check_children = True
+        last_tag = node.tag_name
+        array_used = False
 
         while node.tag_name != 'html':
             p = node.find_element_by_xpath("..")
-            d = defaultdict(int)
-            elements = p.find_elements_by_xpath('*')
-            for j in elements:
-                d[j.tag_name] += 1
-                if j.text == node.text:
-                    path.appendleft(
-                            "%s%s" % (j.tag_name, "[%s]" % d[j.tag_name] if d[j.tag_name] != 1 else "")
-                    )
-                    break
+            if check_children:
+                d = defaultdict(int)
+                elements = p.find_elements_by_xpath(last_tag)
+                if len(elements) > 1:
+                    array_used = True
+                    for j in elements:
+                        d[j.tag_name] += 1
+                        if j.text == node.text and j.location == node.location:
+                            path.appendleft("%s%s" % (j.tag_name, "[%s]" % d[j.tag_name]))
+                            break
+                else:
+                    path.appendleft(elements[0].tag_name)
+                    if (p.tag_name != 'html' and array_used): check_children = False
+                last_tag = p.tag_name
+                del d
+            else: path.appendleft(node.tag_name)
             node = p
-            del d
 
         path.appendleft(node.tag_name)
-
-        if debug:
-            print "pong"
 
         return "/" + "/".join(path)
 
