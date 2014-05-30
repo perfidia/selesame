@@ -1,5 +1,5 @@
 API
 ===
 
-+.. automodule:: selesame
-+   :members:
+.. automodule:: selesame
+    :members:
