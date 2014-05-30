@@ -12,4 +12,3 @@ Contents:
 	_static/installation
 	_static/usage
 	_static/api
-	_static/todo
