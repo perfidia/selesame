@@ -13,5 +13,4 @@ samples of get_same:
 
     .. code-block:: python
         selesame.get_same(url = "http://www.xitro.eu",  driver = webdriver.Firefox, xpath = "/html/body/footer/p", mode=0)
-        selesame.get_same(url = "http://allegro.pl",  driver = webdriver.Chrome,
-            xpath = "/html/body/div[4]/div[2]/div/div/ul/li[1]/div/a/strong", mode=0)
+        selesame.get_same(url = "http://allegro.pl",  driver = webdriver.Chrome, xpath = "/html/body/div[4]/div[2]/div/div/ul/li[1]/div/a/strong", mode=0)
