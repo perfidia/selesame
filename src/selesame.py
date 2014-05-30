@@ -43,19 +43,20 @@ def analyze(url=None, driver=None, mode="all", unique=False):
         xnodes = [node.get_attribute("href"), node.tag_name]
         target = node
 
-        while (node.tag_name != "html"):
+        while node.tag_name != "html":
             node = node.find_element_by_xpath('..')
             xnodes.append(node.tag_name)
 
-        xpath = ""
+        xpath = []
 
         for n, i in enumerate(reversed(xnodes)):
             if n < len(xnodes) - 1:
-                xpath += "/%s" % i
+                xpath.append("/%s" % i)
             else:
                 if i is not None:
-                    xpath += "[contains(@href, \"%s\")]" % i.replace(url, '')
+                    xpath.append("[contains(@href, \"%s\")]" % i.replace(url, ''))
 
+        xpath = "".join(xpath)
         test = node.find_elements_by_xpath(xpath)
 
         if len(test) == 1:
@@ -63,10 +64,12 @@ def analyze(url=None, driver=None, mode="all", unique=False):
 
         return get_exact_xpath(target)
 
-    def get_exact_xpath(node):
+    def get_exact_xpath(node, force_children=False):
         """
         :param node: WebElement took from selenium
         :type node: WebElement
+        :param force_children: Forces function to perform full scan of childrens to get xpath.
+        :type force_children: bool
         :return: xpath to a unique node
         :rtype: str
         """
@@ -77,7 +80,7 @@ def analyze(url=None, driver=None, mode="all", unique=False):
 
         while node.tag_name != 'html':
             p = node.find_element_by_xpath("..")
-            if check_children:
+            if check_children or force_children:
                 d = defaultdict(int)
                 elements = p.find_elements_by_xpath(last_tag)
                 if len(elements) > 1:
@@ -89,7 +92,7 @@ def analyze(url=None, driver=None, mode="all", unique=False):
                             break
                 else:
                     path.appendleft(elements[0].tag_name)
-                    if (p.tag_name != 'html' and array_used): check_children = False
+                    if p.tag_name != 'html' and array_used: check_children = False
                 last_tag = p.tag_name
                 del d
             else: path.appendleft(node.tag_name)

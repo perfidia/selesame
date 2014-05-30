@@ -1,7 +1,7 @@
 Welcome to SeleSame's documentation!
 ================================================
 
-TODO
+SeleSame is a utility for searching multiplied links to same target on a website. It uses selenium to explore website content.
 
 Contents:
 

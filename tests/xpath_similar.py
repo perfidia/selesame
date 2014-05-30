@@ -37,14 +37,12 @@ class Test(unittest.TestCase):
 
     def testCorrectnesOfXPaths(self):
         d = selesame.analyze(url = self.getUrl("xpaths_similar.html"), driver = self.driver)
-        print d
         for v in d.itervalues():
             for xpath in v:
                 self.assertIsNotNone(self.driver.find_element_by_xpath(xpath))
 
     def testNumberOfLinksOnPage(self):
         d = selesame.analyze(url = self.getUrl("xpaths_similar.html"), driver = self.driver)
-        print d
         self.assertEqual(6, len(d['http://example.com/']))
 
 

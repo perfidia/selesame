@@ -22,7 +22,16 @@ Installation
 Getting started
 ---------------
 
-TBD
+Create webdriver of selenium of your browser and pass it with url to get duplicated links on a web page.
+
+`driver = webdriver.Chrome()
+
+selesame.analyze(
+    url = "http://www.xitro.eu",
+    driver = driver
+)`
+
+For more examples look USAGE file.
 
 Authors
 -------
